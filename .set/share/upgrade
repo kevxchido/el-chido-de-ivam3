@@ -1,0 +1,191 @@
+#!/data/data/com.termux/files/usr/bin/bash
+#i-Haklab v.3.0 2021 by Ivam3 - Is a hacking laboratory that contains open source tools recommended by Ivam3.
+#Created on Jan/2019 
+#Modify: 2022-02-15
+####################
+IFS=$'\n\t'
+trap ctrl_c 2
+s5=$(sleep 0.5)
+R='\033[1;31m'
+G='\033[1;32m'
+Goke='\033[92m'
+Glig=='\e[1;32m'
+Y='\033[1;33m'
+B='\033[1;34m'
+M='\033[1;35m'
+C='\033[1;36m'
+W='\033[0m'
+binTools=$(ls $HOME/.local/share/i-Haklab/.set/bin)
+ctrl_c() { printf "$Y\t\t   [¿] Need a help [?]$B\n\t\tTelegram : t.me/Ivam3_Bot$W\n";}
+
+printf "$Y(_>)─➤$W Removing oldest i-Haklab version\n";$s5
+[[ -d $PREFIX/libexec/banner ]] && rm -rf $PREFIX/libexec/banner
+[[ -e $PREFIX/var/log/login-termux ]] && rm $PREFIX/var/log/login-termux
+[[ -d ~/.vim ]] && rm -rf ~/.vim
+for v in ${binTools[*]};do
+	[[ -e $PREFIX/bin/$v ]] && rm $PREFIX/bin/$v
+done
+
+printf "$Y(_>)─➤$W Installing newest i-Haklab version\n"
+git clone --quiet https://github.com/ivam3/i-Haklab.git ~/.local/share/iHaklab
+[[ -d $HOME/.local/share/iHaklab ]] && rm -rf $HOME/.local/share/i-Haklab;mv ~/.local/share/iHaklab ~/.local/share/i-Haklab || { printf "$R(_>)─➤$W i-Haklab directory missing..$R Aborting.$W";exit;}
+source $HOME/.local/share/i-Haklab/.set/var/variables
+source $iHAKLAB/.set/functions/functions
+mkdir -p ~/.local/{etc/i-Haklab,etc/fish,lib,share,tools,var/service/www}
+[[ -d $HOME/.local/bin ]] && rm -rf $HOME/.local/bin
+ln -s $iHAKLAB/.set/bin $HOME/.local/bin
+for i in Quiz Cinderella Ivam3;do
+	[[ -e $PREFIX/libexec/termux/.$i ]] && mv $PREFIX/libexec/termux/.$i $HOME/.local/etc/i-Haklab
+done
+command -v pulseaudio >/dev/null || yes|apt install pulseaudio
+
+#UPGRADE OMF
+printf "$Y(_>)─➤$W Reconfigure startup settings\n";$s5
+cat <<- CONF > $HOME/.local/etc/fish/config.fish
+if status --is-login
+bash /data/data/com.termux/files/home/.local/etc/i-Haklab/wall-banner
+end
+
+function on_exit --on-event fish_exit
+echo 'Have a nice hacking day!!'
+sleep 1
+end
+
+set fish_theme bira
+set -g theme_nerd_fonts yes
+set DISPLAY :0
+set PULSE_SERVER 127.0.0.1
+set PATH $HOME/.local/bin:$PREFIX/bin
+set HOME /data/data/com.termux/files/home
+set GOPATH /data/data/com.termux/files/home/go
+set GOROOT /data/data/com.termux/files/usr/lib/go
+set JAVA_HOME /data/data/com.termux/files/usr/opt/openjdk
+set iHAKLAB /data/data/com.termux/files/home/.local/share/i-Haklab
+set LD_LIBRARY_PATH $HOME/.local/lib:$PREFIX/lib
+set TOOLS $TOOLS
+alias LOCALHOST="ifconfig 2>/dev/null|grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}'|grep -v 255|grep -v 127|tail -n 1"
+alias serverapache="apachectl"
+alias postgresql="pg_ctl -D /data/data/com.termux/files/usr/var/lib/postgresql"
+alias traductor="gawk -f (curl -Ls git.io/translate | psub) -- -shell"
+pulseaudio --start --exit-idle-time=-1
+pacmd load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
+CONF
+[[ -e $PREFIX/etc/fish/config.fish ]] && rm -rf $PREFIX/etc/fish/config.fish || mkdir -p $PREFIX/etc/fish
+ln -s $HOME/.local/etc/fish/config.fish $PREFIX/etc/fish/config.fish
+
+cat <<- CONF > $HOME/.bashrc
+export PATH=$HOME/.local/bin:$PREFIX/bin
+export LD_LIBRARY_PATH=$HOME/.local/lib:$PREFIX/lib
+if [[ ! $(grep -oE "i-Haklab" $PREFIX/etc/fish/config.fish >/dev/null) ]]; then
+     rm -rf $PREFIX/etc/fish/config.fish
+		 ln -s $HOME/.local/etc/fish/config.fish $PREFIX/etc/fish/config.fish
+fi
+chsh -s fish
+CONF
+
+cat <<- CONF > $HOME/.nanorc
+set linenumbers
+set historylog
+set tabsize 4
+set autoindent
+set mouse
+set titlecolor white,gray
+set statuscolor white,red
+set keycolor white,gray
+set functioncolor green
+set numbercolor white,gray
+set softwrap
+set softwrap
+#set nohelp
+CONF
+
+######### Setting login banner #########
+[[ -e $HOME/.local/etc/i-Haklab/login-termux ]] && rm -rf $HOME/.local/etc/i-Haklab/login-termux
+[[ -e $PREFIX/etc/bashito ]] && rm -f $PREFIX/etc/bashito
+[[ -e $PREFIX/etc/motd ]] && rm -f $PREFIX/etc/motd
+[[ -e $PREFIX/etc/motd.dpkg-old ]] && rm -rf $PREFIX/etc/motd.dpkg-old
+for a in Quiz Ivam3 Cinderella;do
+	[[ -e $HOME/.local/etc/i-Haklab/.$a ]] || touch $HOME/.local/etc/i-Haklab/.$a
+done
+[[ -d $HOME/.local/etc/i-Haklab ]] || mkdir -p $HOME/.local/etc/i-Haklab
+wget -q $iHDB/to-install/login-termux -O $HOME/.local/etc/i-Haklab/login-termux
+wget -q $iHDB/libexec/banner/i-Haklab -O $HOME/.local/etc/i-Haklab/login-banner
+cat <<- CONF > $HOME/.local/etc/i-Haklab/wall-banner
+#!/usr/bin/bash
+#Banner for i-Haklab created by @Ivam3 on Jan/2019
+IFS=$'\n\t'
+bash $HOME/.local/etc/i-Haklab/login-banner
+#        i-Haklab by @Ivam3
+CONF
+chmod 711 -R $HOME/.local/etc
+chmod +w $HOME/.local/etc/i-Haklab/.Ivam3
+printf "SXZhbTNieUNpbmRlcmVsbGEK" > $HOME/.local/etc/i-Haklab/.Ivam3
+chmod -w $HOME/.local/etc/i-Haklab/.Ivam3
+chmod +w $HOME/.local/etc/i-Haklab/.Quiz
+printf "VGhlIGFjY2VzcyBrZXkgaXMgSXZhbTNieUNpbmRlcmVsbGEK" > $HOME/.local/etc/i-Haklab/.Quiz
+chmod -w $HOME/.local/etc/i-Haklab/.Quiz
+chmod +w $HOME/.local/etc/i-Haklab/.Cinderella
+printf "SXZhbTNieUNpbmRlcmVsbGEK" > $HOME/.local/etc/i-Haklab/.Cinderella
+chmod -w $HOME/.local/etc/i-Haklab/.Cinderella
+
+######### Upgrading executables #########
+printf "$Y(_>)─➤$W Upgrading commands. . .$W\n";$s5
+chmod 750 $iHAKLAB/.set/bin/*
+[[ -h $HOME/.local/bin ]] || ln -s $iHAKLAB/.set/bin $HOME/.local/bin
+
+printf "$G(_>)─➤$W Setting i-Haklab style.\n";$s5
+[[ -d ~/.termux ]] || mkdir -p ~/.termux
+for i in $(ls $iHAKLAB/.set/to-install/.termux);do
+	wget -q --tries=20 $iHDB/to-install/$i -O ~/.termux/$i
+done
+[[ -e ~/.termux/shell ]] || ln -s $PREFIX/bin/fish ~/.termux/shell
+
+printf "$G(_>)─➤$W Installing NANO and VIM predictable text.\n";$s5
+cat <<- CONF > $HOME/.nanorc
+set linenumbers
+set historylog
+set tabsize 4
+set autoindent
+set mouse
+set titlecolor white,gray
+set statuscolor white,red
+set keycolor white,gray
+set functioncolor green
+set numbercolor white,gray
+set softwrap
+set softwrap
+#set nohelp
+CONF
+wget -q --tries=20 ${iHDB}/to-install/iHaklabvim.zip -O $TMPDIR/iHaklabvim.zip
+unzip -q $TMPDIR/iHaklabvim.zip -d $TMPDIR
+rm -f $TMPDIR/iHaklabvim.zip
+mv $TMPDIR/iHaklabvim/vim ~/.vim
+mv $TMPDIR/iHaklabvim/vim/.vimrc ~/
+rm -f $TMPDIR/iHaklabvim
+vim +PlugUpdate +x +x
+
+bash $HOME/.local/etc/i-Haklab/wall-banner
+printf "$G
+(_>)─➤$W i-Haklab upgraded at version 3.0$G
+ ╰─────$Y~☆ New features:$G
+ ╰──────────$Y~☆$W code cleaner that optimizes the use of RAM$G
+ ╰──────────$Y~☆$W obsolete tools removed$G
+ ╰──────────$Y~☆$W list all installed tools with i-Haklab+show+listalltools$G
+ ╰──────────$Y~☆$W common wordlist for brute force attacks added$G
+ ╰──────────$Y~☆$W IbyC-fixer + RuGiR updated to fix possible issues$G
+ ╰──────────$Y~☆$W vim predictable text$G
+ ╰──────────$Y~☆$W code server for a best programer enviroment$G
+ ╰──────────$Y~☆$W easy execution of fake root as command 'sudo'$G
+ ╰──────────$Y~☆$W enable and desable login access with i-Haklab+install/remove$G
+ ╰──────────$Y~☆$W install/remove more than 1 tool at the same time $G
+ ╰──────────$Y~☆$W java 17 added$G
+ ╰──────────$Y~☆$W verbosity applied at remove to deleting all dependencies too$G
+ ╰──────────$Y~☆$W ngrok,ngrok.io and pagekite server added$G
+ ╰──────────$Y~☆$W all abhacker repositories added$G
+ ╰──────────$Y~☆$W metasploit easy and fast installation$G
+ ╰──────────$Y~☆$W graphical environment with Termux:wayland or VNC-app$G
+ ╰──────────$Y~☆$W automated installation and configuration x11-pkg$G
+ ╰──────────$Y~☆$W wireshark xhydra vscode and vim editor on graphical enviroment$G
+ |
+ ╰───────────➤$W to report issues goin to$B https://t.me/Ivam3_Bot."
+#       i-Haklab by @Ivam3
